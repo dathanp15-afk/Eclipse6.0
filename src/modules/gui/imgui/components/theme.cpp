@@ -313,7 +313,8 @@ namespace eclipse::gui::imgui {
         )) {
             ImGui::InputText("##search", combo->getSearchBuffer());
             for (int n = 0; n < items.size(); n++) {
-                auto option = std::string(items[n].stem().value_or({}));
+                auto option = std::string(items[n].stem().value_or(""));
+
                 if(geode::utils::string::toLower(option).find(geode::utils::string::toLower(*combo->getSearchBuffer())) != std::string::npos) {
                     bool const is_selected = (value == items[n]);
                     if (ImGui::Selectable(option.c_str(), is_selected)) {
