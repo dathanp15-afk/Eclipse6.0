@@ -4,7 +4,7 @@
 #include <modules/gui/components/input-text.hpp>
 
 namespace eclipse::gui::cocos {
-    class InputTextComponentNode : public BaseComponentNode<InputTextComponentNode, cocos2d::CCMenu, InputTextComponent, float>, public TextInputDelegate {
+    class InputTextComponentNode : public BaseComponentNode<InputTextComponentNode, cocos2d::CCMenu, InputTextComponent, float> {
     protected:
         TranslatedLabel* m_label = nullptr;
         CCMenuItemSpriteExtra* m_infoButton = nullptr;
@@ -40,21 +40,18 @@ namespace eclipse::gui::cocos {
             auto inputWidth = width - labelSize - 50.f;
             m_textInput = geode::TextInput::create(inputWidth, "", "font_default.fnt"_spr);
             m_textInput->setAnchorPoint({ 0.5f, 0.5f });
-            m_textInput->setDelegate(this);
-            m_textInput->setString(m_component->getValue());
+            m_textInput->setCallback([this](std::string const& str) {
+                m_component->setValue(str);
+                m_component->triggerCallback(str);
+            });
+            m_textInput->addUnfocusCallback("reset-text", [this]() {
+                m_textInput->setString(m_component->getValue(), false);
+            }, 0);
+            m_textInput->setString(m_component->getValue(), false);
             m_textInput->setScale(0.85f);
             this->addChildAtPosition(m_textInput, geode::Anchor::Right, { -inputWidth / 2 - 5.f, 0.f });
 
             return true;
-        }
-
-        void textChanged(CCTextInputNode* input) override {
-            m_component->setValue(input->getString());
-            m_component->triggerCallback(input->getString());
-        }
-
-        void textInputClosed(CCTextInputNode* input) override {
-            m_textInput->setString(m_component->getValue());
         }
     };
 }
