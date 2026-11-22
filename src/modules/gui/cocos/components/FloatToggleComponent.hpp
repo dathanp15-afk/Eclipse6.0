@@ -5,7 +5,7 @@
 #include <modules/gui/theming/manager.hpp>
 
 namespace eclipse::gui::cocos {
-    class FloatToggleComponentNode : public BaseComponentNode<FloatToggleComponentNode, cocos2d::CCMenu, FloatToggleComponent, float>, public TextInputDelegate {
+    class FloatToggleComponentNode : public BaseComponentNode<FloatToggleComponentNode, cocos2d::CCMenu, FloatToggleComponent, float> {
     protected:
         CCMenuItemToggler* m_toggler = nullptr;
         TranslatedLabel* m_label = nullptr;
@@ -55,28 +55,25 @@ namespace eclipse::gui::cocos {
 
             m_textInput = geode::TextInput::create(120, m_component->getTitle().c_str(), "font_default.fnt"_spr);
             m_textInput->setAnchorPoint({ 0.5f, 0.5f });
-            m_textInput->getInputNode()->setAllowedChars(".0123456789");
-            m_textInput->setDelegate(this);
-            m_textInput->setString(fmt::to_string(m_component->getValue()));
+            m_textInput->setFilter(".0123456789");
+            m_textInput->setCallback([this](std::string const& str) {
+                geode::Result<float> valueOpt = geode::utils::numFromString<float>(str);
+                if (!valueOpt)
+                    return;
+
+                float value = std::clamp(*valueOpt, m_component->getMin(), m_component->getMax());
+
+                m_component->setValue(value);
+                m_component->triggerCallback(value);
+            });
+            m_textInput->addUnfocusCallback("reset-text", [this]() {
+                m_textInput->setString(fmt::to_string(m_component->getValue()), false);
+            }, 0);
+            m_textInput->setString(fmt::to_string(m_component->getValue()), false);
             m_textInput->setScale(0.85f);
             this->addChildAtPosition(m_textInput, geode::Anchor::Right, { -70.f, 0.f });
 
             return true;
-        }
-
-        void textChanged(CCTextInputNode* input) override {
-            geode::Result<float> valueOpt = geode::utils::numFromString<float>(input->getString());
-            if(!valueOpt)
-                return;
-
-            float value = std::clamp(*valueOpt, m_component->getMin(), m_component->getMax());
-
-            m_component->setValue(value);
-            m_component->triggerCallback(value);
-        }
-
-        void textInputClosed(CCTextInputNode* input) override {
-            m_textInput->setString(fmt::to_string(m_component->getValue()));
         }
     };
 }
