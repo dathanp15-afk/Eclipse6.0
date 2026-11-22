@@ -179,7 +179,7 @@ namespace eclipse::gui::imgui {
             for (auto entry : iterRes.unwrap()) {
                 if (entry.isErr()) continue;
                 if (entry.unwrap().path.extension() != "ttf") continue;
-                auto filename = entry.unwrap().path.stem().value_or({});
+                auto filename = entry.unwrap().path.stem().value_or("");
                 FontMetadata font{std::string(filename), entry.unwrap().path};
                 result.push_back(std::move(font));
             }
