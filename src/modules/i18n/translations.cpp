@@ -183,8 +183,8 @@ namespace eclipse::i18n {
 
                 auto filename = entry.path.filename().value_or({});
                 if (filename.size() < 10 || filename.view().substr(filename.size() - 10) != ".lang.json") continue;
-
-                auto code = filename.view().substr(0, filename.size() - 10);
+                
+                auto code = std::string(filename.view().substr(0, filename.size() - 10));
                 auto name = getLanguageName(entry.path);
                 if (!name) continue;
 
